@@ -16,7 +16,13 @@
 
 package com.google.gson.internal.bind;
 
-import com.google.gson.TypeAdapterFactory;
+import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,31 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.util.BitSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.UUID;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.SerializedName;
-import com.google.gson.internal.LazilyParsedNumber;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
+import java.util.*;
 
 /**
  * Type adapters for basic types.
@@ -308,7 +290,9 @@ public final class TypeAdapters {
         in.nextNull();
         return null;
       case NUMBER:
-        return new LazilyParsedNumber(in.nextString());
+        // mymod
+//      return new LazilyParsedNumber(in.nextString());
+        return JsonPrimitive.stringToNumber(in.nextString());
       default:
         throw new JsonSyntaxException("Expecting number, got: " + jsonToken);
       }
@@ -362,7 +346,7 @@ public final class TypeAdapters {
       out.value(value);
     }
   };
-  
+
   public static final TypeAdapter<BigDecimal> BIG_DECIMAL = new TypeAdapter<BigDecimal>() {
     @Override public BigDecimal read(JsonReader in) throws IOException {
       if (in.peek() == JsonToken.NULL) {
@@ -380,7 +364,7 @@ public final class TypeAdapters {
       out.value(value);
     }
   };
-  
+
   public static final TypeAdapter<BigInteger> BIG_INTEGER = new TypeAdapter<BigInteger>() {
     @Override public BigInteger read(JsonReader in) throws IOException {
       if (in.peek() == JsonToken.NULL) {
@@ -646,7 +630,9 @@ public final class TypeAdapters {
         return new JsonPrimitive(in.nextString());
       case NUMBER:
         String number = in.nextString();
-        return new JsonPrimitive(new LazilyParsedNumber(number));
+        // mymod
+//        return new JsonPrimitive(new LazilyParsedNumber(number));
+        return new JsonPrimitive(JsonPrimitive.stringToNumber(number));
       case BOOLEAN:
         return new JsonPrimitive(in.nextBoolean());
       case NULL:

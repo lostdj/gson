@@ -868,6 +868,42 @@ public class JsonReader implements Closeable {
     }
   }
 
+	// mymod
+	public Number nextNumber() throws IOException {
+		int p = peeked;
+		if (p == PEEKED_NONE) {
+			p = doPeek();
+		}
+
+		if (p == PEEKED_LONG) {
+			peeked = PEEKED_NONE;
+			return peekedLong;
+		}
+
+		if (p == PEEKED_NUMBER) {
+			peekedString = new String(buffer, pos, peekedNumberLength);
+			pos += peekedNumberLength;
+		} else if (p == PEEKED_SINGLE_QUOTED || p == PEEKED_DOUBLE_QUOTED) {
+			peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
+		} else if (p == PEEKED_UNQUOTED) {
+			peekedString = nextUnquotedValue();
+		} else if (p != PEEKED_BUFFERED) {
+			throw new IllegalStateException("Expected a double but was " + peek()
+				+ " at line " + getLineNumber() + " column " + getColumnNumber());
+		}
+
+		peeked = PEEKED_BUFFERED;
+		double result = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
+		if (!lenient && (Double.isNaN(result) || Double.isInfinite(result))) {
+			throw new MalformedJsonException("JSON forbids NaN and infinities: " + result
+				+ " at line " + getLineNumber() + " column " + getColumnNumber());
+		}
+		peekedString = null;
+		peeked = PEEKED_NONE;
+		return result;
+	}
+	// /mymod
+
   /**
    * Returns the {@link com.google.gson.stream.JsonToken#NUMBER double} value of the next token,
    * consuming it. If the next token is a string, this method will attempt to

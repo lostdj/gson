@@ -16,11 +16,10 @@
 
 package com.google.gson;
 
+import com.google.gson.internal.$Gson$Preconditions;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import com.google.gson.internal.$Gson$Preconditions;
-import com.google.gson.internal.LazilyParsedNumber;
 
 /**
  * A class representing a Json primitive value. A primitive value
@@ -154,8 +153,29 @@ public final class JsonPrimitive extends JsonElement {
    */
   @Override
   public Number getAsNumber() {
-    return value instanceof String ? new LazilyParsedNumber((String) value) : (Number) value;
+      // mymod
+      //return value instanceof String ? new LazilyParsedNumber((String) value) : (Number) value;
+      return value instanceof String ? stringToNumber((String) value) : (Number) value;
+	}
+
+  // mymod
+  public static Number stringToNumber(String value) {
+    try {
+      long longValue = Long.parseLong(value);
+      if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+        return (int) longValue;
+      }
+      return longValue;
+    } catch (NumberFormatException ignored) {
+    }
+
+    try {
+      return new BigDecimal(value);
+    } catch (NumberFormatException ignored) {
+      return Double.parseDouble(value); // probably NaN, -Infinity or Infinity
+    }
   }
+  // /mymod
 
   /**
    * Check whether this primitive contains a String value.
