@@ -186,6 +186,7 @@ public class JsonWriter implements Closeable, Flushable {
   private boolean htmlSafe;
 
   private String deferredName;
+  private boolean disablePrimitiveMapKeysQuoting;
 
   private boolean serializeNulls = true;
 
@@ -383,6 +384,12 @@ public class JsonWriter implements Closeable, Flushable {
    * @return this writer.
    */
   public JsonWriter name(String name) throws IOException {
+    name(name, false);
+
+    return this;
+  }
+
+  public JsonWriter name(String name, boolean disablePrimitiveMapKeysQuoting) throws IOException {
     if (name == null) {
       throw new NullPointerException("name == null");
     }
@@ -393,6 +400,7 @@ public class JsonWriter implements Closeable, Flushable {
       throw new IllegalStateException("JsonWriter is closed.");
     }
     deferredName = name;
+    this.disablePrimitiveMapKeysQuoting = disablePrimitiveMapKeysQuoting;
     return this;
   }
 
@@ -531,7 +539,8 @@ public class JsonWriter implements Closeable, Flushable {
 
   private void string(String value) throws IOException {
     String[] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
-    out.write("\"");
+    if(!disablePrimitiveMapKeysQuoting)
+      out.write("\"");
     int last = 0;
     int length = value.length();
     for (int i = 0; i < length; i++) {
@@ -558,7 +567,9 @@ public class JsonWriter implements Closeable, Flushable {
     if (last < length) {
       out.write(value, last, length - last);
     }
-    out.write("\"");
+
+    if(!disablePrimitiveMapKeysQuoting)
+      out.write("\"");
   }
 
   private void newline() throws IOException {

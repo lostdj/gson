@@ -78,6 +78,7 @@ public final class GsonBuilder {
   private String datePattern;
   private int dateStyle = DateFormat.DEFAULT;
   private int timeStyle = DateFormat.DEFAULT;
+  private boolean disablePrimitiveMapKeysQuoting;
   private boolean complexMapKeySerialization;
   private boolean serializeSpecialFloatingPointValues;
   private boolean escapeHtmlChars = true;
@@ -157,6 +158,12 @@ public final class GsonBuilder {
     this.serializeNulls = true;
     return this;
   }
+
+  public GsonBuilder disablePrimitiveMapKeysQuoting() {
+    disablePrimitiveMapKeysQuoting = true;
+    return this;
+  }
+
 
   /**
    * Enabling this feature will only change the serialized form if the map key is
@@ -543,7 +550,7 @@ public final class GsonBuilder {
     addTypeAdaptersForDate(datePattern, dateStyle, timeStyle, factories);
 
     return new Gson(excluder, fieldNamingPolicy, instanceCreators,
-        serializeNulls, complexMapKeySerialization,
+        serializeNulls, disablePrimitiveMapKeysQuoting, complexMapKeySerialization,
         generateNonExecutableJson, escapeHtmlChars, prettyPrinting,
         serializeSpecialFloatingPointValues, longSerializationPolicy, factories);
   }

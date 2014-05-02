@@ -105,10 +105,12 @@ import java.util.Map;
 public final class MapTypeAdapterFactory implements TypeAdapterFactory {
   private final ConstructorConstructor constructorConstructor;
   private final boolean complexMapKeySerialization;
+  private final boolean disablePrimitiveMapKeysQuoting;
 
   public MapTypeAdapterFactory(ConstructorConstructor constructorConstructor,
-      boolean complexMapKeySerialization) {
+      boolean disablePrimitiveMapKeysQuoting, boolean complexMapKeySerialization) {
     this.constructorConstructor = constructorConstructor;
+    this.disablePrimitiveMapKeysQuoting = disablePrimitiveMapKeysQuoting;
     this.complexMapKeySerialization = complexMapKeySerialization;
   }
 
@@ -204,7 +206,16 @@ public final class MapTypeAdapterFactory implements TypeAdapterFactory {
       if (!complexMapKeySerialization) {
         out.beginObject();
         for (Map.Entry<K, V> entry : map.entrySet()) {
-          out.name(String.valueOf(entry.getKey()));
+          if(disablePrimitiveMapKeysQuoting && (
+                 entry.getKey().getClass() == Long.class
+              || entry.getKey().getClass() == Integer.class
+              || entry.getKey().getClass() == Short.class
+              || entry.getKey().getClass() == Byte.class
+              || entry.getKey().getClass() == Double.class
+              || entry.getKey().getClass() == Float.class))
+            out.name(String.valueOf(entry.getKey()), disablePrimitiveMapKeysQuoting);
+          else
+            out.name(String.valueOf(entry.getKey()));
           valueTypeAdapter.write(out, entry.getValue());
         }
         out.endObject();
